@@ -23,6 +23,11 @@ public class Maze : MonoBehaviour
     private Cell[] cells;
     public int currentCell = 0;
     public int totalCells;
+    public int visitedCells = 0;
+    public int currentNeighbour = 0;
+    public bool startedBuilding = false;
+    public List<int> lastCells;
+    public int backingUpIndex = 0;
 
     // Start is called before the first frame update
     void Start()
@@ -104,7 +109,58 @@ public class Maze : MonoBehaviour
 
     void CreateMaze()
     {
-        GiveMeNeighbour();
+        if (visitedCells < totalCells)
+        {
+            if (startedBuilding)
+            {
+                GiveMeNeighbour();
+
+                if (!cells[currentNeighbour].visited)
+                {
+                    BreakWall();
+                    cells[currentNeighbour].visited = true;
+                    visitedCells++;
+                    lastCells.Add(currentCell);
+                    currentCell = currentNeighbour;
+
+                    if (lastCells.Count > 0)
+                    {
+                        backingUpIndex = lastCells.Count - 1;
+                    }
+                }
+            }
+            else
+            {
+                currentCell = Random.Range(0, totalCells);
+                cells[currentCell].visited = true;
+                visitedCells++;
+                startedBuilding = true;
+            }
+
+            Invoke("CreateMaze", 0.0f);
+        }
+        // if visited < totalcells
+            // if startedBuilding
+                // GiveMeNeighbour();
+                // if not visited currentNeighbour
+                    // BreakWall();
+                    // mark visited
+                    // increment visited
+                    // add currentCell to cell stack
+                    // assign currentNeighbour to currentCell
+                    // if cellStack count greater than 0
+                        // set backingupIndex to cellStack.count - 1
+            // else
+                // pick random cell for current cell
+                // mark visited
+                // increment visited
+                // mark started building
+            // Invoke "CreateMaze" 0.0f
+    }
+
+    void BreakWall()
+    {
+        // break switch
     }
 
     void GiveMeNeighbour()
@@ -130,7 +186,7 @@ public class Maze : MonoBehaviour
         // Check west
         if (currentCell != check)
         {
-            if (!cells[currentCell + 1].visited)
+            if (!cells[currentCell - 1].visited)
             {
                 neighbours[neighbourLength] = currentCell - 1;
                 neighbourLength++;
@@ -157,8 +213,22 @@ public class Maze : MonoBehaviour
             }
         }
 
-        for (int i = 0; i < neighbourLength; i++)
-            Debug.Log(neighbours[i]);
+        if (neighbourLength != 0)
+        {
+            int chosen = Random.Range(0, neighbourLength);
+            currentNeighbour = neighbours[chosen];
+        }
+        else
+        {
+            if (backingUpIndex > 0)
+            {
+                currentCell = lastCells[backingUpIndex];
+                backingUpIndex--;
+            }
+        }
+
+        //for (int i = 0; i < neighbourLength; i++)
+        //    Debug.Log(neighbours[i]);
     }
 
     // Update is called once per frame
