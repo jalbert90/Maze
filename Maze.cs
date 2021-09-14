@@ -28,6 +28,8 @@ public class Maze : MonoBehaviour
     public bool startedBuilding = false;
     public List<int> lastCells;
     public int backingUpIndex = 0;
+    public int[] wallCode;
+    public int currentWallCode = 0;
 
     // Start is called before the first frame update
     void Start()
@@ -139,32 +141,36 @@ public class Maze : MonoBehaviour
 
             Invoke("CreateMaze", 0.0f);
         }
-        // if visited < totalcells
-            // if startedBuilding
-                // GiveMeNeighbour();
-                // if not visited currentNeighbour
-                    // BreakWall();
-                    // mark visited
-                    // increment visited
-                    // add currentCell to cell stack
-                    // assign currentNeighbour to currentCell
-                    // if cellStack count greater than 0
-                        // set backingupIndex to cellStack.count - 1
-            // else
-                // pick random cell for current cell
-                // mark visited
-                // increment visited
-                // mark started building
-            // Invoke "CreateMaze" 0.0f
     }
 
     void BreakWall()
     {
-        // break switch
+        switch (currentWallCode)
+        {
+            case 1:
+                // break east wall
+                Destroy(cells[currentCell].east);
+                break;
+            case 2:
+                // break west wall
+                Destroy(cells[currentCell].west);
+                break;
+            case 3:
+                // break north wall
+                Destroy(cells[currentCell].north);
+                break;
+            case 4:
+                // break south wall
+                Destroy(cells[currentCell].south);
+                break;
+            default:
+                break;
+        }
     }
 
     void GiveMeNeighbour()
     {
+        wallCode = new int[4];
         int[] neighbours = new int[4];
         int neighbourLength = 0;
         int check = 0;
@@ -179,6 +185,7 @@ public class Maze : MonoBehaviour
             if (!cells[currentCell + 1].visited)
             {
                 neighbours[neighbourLength] = currentCell + 1;
+                wallCode[neighbourLength] = 1;  // East wall
                 neighbourLength++;
             }
         }
@@ -189,6 +196,7 @@ public class Maze : MonoBehaviour
             if (!cells[currentCell - 1].visited)
             {
                 neighbours[neighbourLength] = currentCell - 1;
+                wallCode[neighbourLength] = 2;  // West wall
                 neighbourLength++;
             }
         }
@@ -199,6 +207,7 @@ public class Maze : MonoBehaviour
             if (!cells[currentCell + xGrids].visited)
             {
                 neighbours[neighbourLength] = currentCell + xGrids;
+                wallCode[neighbourLength] = 3;  // North wall
                 neighbourLength++;
             }
         }
@@ -209,6 +218,7 @@ public class Maze : MonoBehaviour
             if (!cells[currentCell - xGrids].visited)
             {
                 neighbours[neighbourLength] = currentCell - xGrids;
+                wallCode[neighbourLength] = 4;  // South wall
                 neighbourLength++;
             }
         }
@@ -217,6 +227,7 @@ public class Maze : MonoBehaviour
         {
             int chosen = Random.Range(0, neighbourLength);
             currentNeighbour = neighbours[chosen];
+            currentWallCode = wallCode[chosen];
         }
         else
         {
